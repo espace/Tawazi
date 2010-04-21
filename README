@@ -1,0 +1,64 @@
+Tawazi - Parallel Design Patterns Frameworks in Ruby
+
+I-Introduction
+
+Tawazi is the Arabic translation for the English word "Parallel". Tawazi is a library written 100% in Ruby. Tawazi provides Ruby developers an easy-to-use, easy-to-extend, high-performing parallel execution frameworks inspired by the theory of Parallel Design Patterns (http://parlab.eecs.berkeley.edu/wiki/patterns/patterns).
+
+For years, processor manufactures consistently delivered increases in clock rates and instruction-level parallelism, so that single-threaded code executed faster on newer 
+processors with no modification. Now,to manage CPU power dissipation, processor manufacturers favor multi-core chip designs, and software has to be written in amulti-threaded or multi-process manner to take full advantage of the hardware. Handling Parallel processing and concurrency issues every time we write our software has many drawbacks: 
+
+1-Not all application developers has deep knowledge about parallel processing and councurrency control. They should focus in solving their application problems instead of dealing with parallel processing problems.
+
+2-No code reuse. Every time you will repeat the same "patterns" to solve parallel processing problem.
+
+3-A big source for bugs and concurrency mistakes, specially for large and complex systems.
+
+4-Poor code clearness and readability. No common language between developers.
+
+Tawazi provides a set of powerful frameworks for Ruby developers to write rapid multicore-enabled (based on the Ruby virtual machine support. JRuby is an example of multicore-aware Ruby VM) application without the need to take care of parallel processing issues.
+
+Initially we developed the core of the "Data Flow Graph" framework. "Fork/Join" and "Map-Reduce" are currently under development. The following sections describe what is data flow graph, how to design your problem using it and how to use Tawazi to easly build your application data flow graph.
+
+II-Data Flow Graph
+
+Data flow graph is a parallel design pattern in which the designer or the Architect starts by decomposing his problem into a number of independent operators (workers). These operators work in parallel. The only way of communication between these operators is through data flows. Data flow is a special queue takes the generated data tokens from one output port of an operator to one (or more) input ports of other operator(s). You can imagine your application as an acyclic directed graph with the operators are represented as nodes and flows as edges.
+
+Many problems (specially data intensive problems) can be modeled in data flow graphs. It gives you the ability to decompose your application and focus on each operator separately. When one operator has a chance to be decomposed into more parallel operators you can go and handle it as a new graph. This new graph is plugged in your original graph as a sub graph and you will utilize more cores transparently.
+
+Let us look at an example: consider you want to load 2 sorted lists from two text files and merge them into one sorted list and then store it into a new text file. You can do this in sequence: 
+	load file1 --> list1
+	load file2 --> list2
+	merge list1,list2 -->list
+	save list --> file
+
+Why do you  wait for list1 to be loaded before you started in loading list2? Why do you wait for list1 and list2 to be completely loaded to start merging the first elements? Why do you wait for the merge operation to complete before saving the first resulting sorted elements? The answer of these questions and similar is: I used to design my application in sequential steps. 
+
+Two operators are considered totally independent if non of them takes any output of the other as an input. Example: The first and second steps in the code above. Loading file1 and file2 are totally independent. On the other hand if one operator takes the output of another one as an input then they are pipelined. Every generated data token by the third step (merge) can be immediately forwarded to the fourth (save). 
+
+III-Tawazi Data Flow Graph
+
+To run Tawazi and make benefit of you need to have a multicore machine (Considerable performance gain starts from Quad core. On Dual core the results highly depends on the applications because of the fact that the gain you take by the use of the two cores is opposed by the overhead needed to handle the concurrency.)
+
+Second, Your Ruby VM must map Threads into OS threads not green threads. JRuby is an example of such VM. Third, your OS must be multicore enabled which is the case with most of all modern OS's.
+
+To use the library follow these simple steps
+1-download it :
+2-Unzip the downloaded file
+3-In the command line change your current directory to your unzip folder
+4-Write the command: jruby examples.rb
+5-This should run the three methods:
+	single_function_graph_composition_example
+	defining_new_operators_example
+	reusing_graph_example
+
+All of these methods do the same thing. It creates three operators: a producer and two consumers. The producer produces the numbers from 0 to 999 and each of the two consumer consumes these numbers and print the results to the STOUT. 
+
+Although this is a very simple example, it represents a three different ways to use Tawazi to construct your application graph. Please open the file in your editor and follow the comments in the three functions.
+
+encryption_example.rb contains a more sophisticated example. The graph is drawn in an image in the same folder called envelop.jpg. Enveloping is a famous cryptographic operation in which you encrypt and sign your message. This example contains 7 parallel operators and it contains heavy computational algorithms like RSA, SHA1 and AES. The main purpose of this experiment is to compare the performance of sequential code and Data flow graph code in a real problem. After executing this experiment on 100000 messages on quad-core the results are:
+	17.06 sec for Tawazi Data Flow Graph execution
+	26.35 sec for sequential execution
+	This is a 35.3% speedup
+
+
+

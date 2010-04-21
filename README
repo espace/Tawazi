@@ -42,11 +42,10 @@ To run Tawazi and make benefit of you need to have a multicore machine (Consider
 Second, Your Ruby VM must map Threads into OS threads not green threads. JRuby is an example of such VM. Third, your OS must be multicore enabled which is the case with most of all modern OS's.
 
 To use the library follow these simple steps
-1-download it :
-2-Unzip the downloaded file
-3-In the command line change your current directory to your unzip folder
-4-Write the command: jruby examples.rb
-5-This should run the three methods:
+1-check out the source code into a folder called Tawazi
+2-In the command line change your current directory to Tawazi
+3-Write the command: jruby examples.rb
+4-This should run the three methods:
 	single_function_graph_composition_example
 	defining_new_operators_example
 	reusing_graph_example
